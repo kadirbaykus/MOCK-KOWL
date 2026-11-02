@@ -3,6 +3,7 @@ import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {buildCustomer} from './customers.js';
 import {createSaleEffects} from './sale-effects.js';
+import {createCaravanController} from './caravan.js';
 export function createWorld(host){
  const scene=new T.Scene();scene.background=new T.Color('#a7d9f0');scene.fog=new T.Fog('#a7d9f0',40,90);
  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.NeutralToneMapping;renderer.toneMappingExposure=1.05;host.append(renderer.domElement);
@@ -25,18 +26,13 @@ export function createWorld(host){
  for(let i=0;i<16;i++){let x=-10+i*1.3;box(.12,1,.14,'#f7edd5',x,.75,-7.5);if(i<15)box(1.3,.12,.12,'#eee0c3',x+.65,1,-7.5);}
  function flower(x,z,c){cyl(.025,.35,'#71834f',x,.45,z);for(let j=0;j<5;j++){const a=j/5*Math.PI*2;sphere(.085,c,x+Math.cos(a)*.1,.65,z+Math.sin(a)*.1);}sphere(.065,'#ffdd48',x,.69,z);}
  for(let i=0;i<45;i++){const x=Math.sin(i*5.7)*9,z=Math.cos(i*3.3)*7;if(Math.abs(x)>5||z<-4)flower(x,z,['#ffcf32','#f55c83','#a277ef'][i%3]);}
- // Coffee trailer with striped awning, hatch, espresso machine and owl emblem.
+ // A stable root keeps sale effects aligned while caravan models are replaced.
  const van=new T.Group();scene.add(van);van.position.set(-.9,.4,-1.4);
- box(4.8,2.55,2.65,'#faf0d9',0,2,0,van);box(4.9,.95,2.72,'#249b87',0,1.25,0,van);box(4.9,.25,2.8,'#e0be88',0,3.34,0,van);
- box(3.55,1.25,.08,'#3e5347',-.2,2.25,1.36,van);box(3.7,.15,.65,'#ae7950',-.2,1.6,1.55,van);
- box(.65,.5,.45,'#c5c9bd',-.9,1.93,1.25,van);box(.7,.08,.49,'#3c4b40',-.9,2.2,1.25,van);cyl(.06,.2,'#d9b879',-.9,1.93,1.55,van);
- for(let i=0;i<3;i++)cyl(.09,.17,'#fff6de',.2+i*.32,1.76,1.5,van);
- for(let i=0;i<10;i++){const roof=box(.45,.12,1.55,i%2?'#fff1cf':'#ed7850',-2.025+i*.45,3.1,1.9,van);roof.rotation.x=.15;box(.45,.3,.09,i%2?'#fff1cf':'#ed7850',-2.025+i*.45,2.85,2.66,van);}
- for(const x of [-1.6,1.6]){const wheel=cyl(.49,.26,'#3c4541',x,.55,.96,van);wheel.rotation.x=Math.PI/2;const hub=cyl(.24,.28,'#e7d8bc',x,.55,.96,van);hub.rotation.x=Math.PI/2;}
- box(.55,.17,.7,'#79786b',2.65,.65,0,van);cyl(.07,.65,'#79786b',2.9,.4,0,van);
- label('KOWL',2.35,.72,'#f9eed6','#3c6450',.25,3.9,1.39,van);box(3.6,1,.13,'#f9eed6',-.15,3.9,1.25,van);
- const owl=new T.Group();van.add(owl);owl.position.set(-1.5,3.9,1.42);sphere(.34,'#9c6947',0,0,0,owl);sphere(.22,'#e8d5a7',-.15,.05,.2,owl);sphere(.22,'#e8d5a7',.15,.05,.2,owl);sphere(.09,'#354c3d',-.15,.07,.38,owl);sphere(.09,'#354c3d',.15,.07,.38,owl);sphere(.035,'#fff8e5',-.17,.1,.45,owl);sphere(.035,'#fff8e5',.13,.1,.45,owl);const beak=mesh(new T.ConeGeometry(.09,.19,4),'#d5a451',0,-.1,.4,owl);beak.rotation.x=Math.PI/2;
- for(const x of [-.23,.23])mesh(new T.ConeGeometry(.15,.28,3),'#9c6947',x,.32,0,owl);
+ const caravan=createCaravanController(van,mat,{
+  reducedMotion:globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false,
+  onReveal:(stage,level)=>host.dispatchEvent(new CustomEvent('caravan-upgraded',{detail:{name:stage.name,level}}))
+ });
+ caravan.setLevel(0);
  // Chalk menu and outdoor seating.
  const menu=box(.9,1.35,.1,'#a87951',-4,.95,1.2);menu.rotation.z=-.1;label('COFFEE',.75,.3,'#354d41','#ffefc7',-4,1.25,1.26);label('24 ₺',.7,.3,'#354d41','#ffefc7',-4,.85,1.26);
  function table(x,z){cyl(.63,.12,'#d2a76a',x,1.15,z);cyl(.08,1,'#71634b',x,.6,z);for(const dx of [-.95,.95]){cyl(.33,.13,'#35a89c',x+dx,.65,z);for(const dz of [-.16,.16])cyl(.045,.6,'#7c7057',x+dx,.3,z+dz);}}
@@ -64,9 +60,9 @@ export function createWorld(host){
  function person(id){const p=buildCustomer(id,mat);scene.add(p.g);p.g.position.set(8.6,.35,4.5);people.push(p);return p;}
  function completeSale(kind){const p=people.find(p=>!p.leaving&&!p.receiving);const origin=effects.serve(p,kind);const projected=origin.clone().project(camera);return {x:(projected.x+1)*innerWidth/2,y:(1-projected.y)*innerHeight/2};}
  let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.05);last=now;let index=0;for(let i=0;i<people.length;i++){const p=people[i];const target=p.receiving?p.g.position.clone():p.leaving?new T.Vector3(-12,.35,4.5):new T.Vector3(.1,.35,2.65+(index++)*.88);const delta=target.clone().sub(p.g.position);if(delta.length()>.04){p.g.position.addScaledVector(delta.normalize(),Math.min(dt*p.appearance.speed,p.g.position.distanceTo(target)));p.g.rotation.y=Math.atan2(delta.x,delta.z);p.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.4);p.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.3);p.body.position.y=-.2*p.appearance.height+Math.abs(Math.sin(now*.009+p.appearance.phase))*.025;}else{p.legs.forEach(leg=>leg.rotation.x=0);p.arms.forEach(arm=>arm.rotation.x=0);p.g.rotation.y=Math.PI;}if(p.leaving&&p.g.position.x<-11){scene.remove(p.g);people.splice(i--,1);p.g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}}
- effects.tick(dt,now);for(const p of people)if(p.hasCoffee)p.arms[1].rotation.x=-1;
+ caravan.tick(dt);effects.tick(dt,now);for(const p of people)if(p.hasCoffee)p.arms[1].rotation.x=-1;
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();
- return {person,completeSale,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level)=>{van.scale.setScalar(1+Math.min(level,10)*.018);},renderer};
+ return {person,completeSale,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level,options)=>caravan.setLevel(level,options),renderer};
 }

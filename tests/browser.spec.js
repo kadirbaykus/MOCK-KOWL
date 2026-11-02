@@ -14,7 +14,7 @@ test('legacy barista save upgrades to level ten and the expanded menu scrolls',a
  await expect(page.getByRole('button',{name:/Barista · Lv. 1\/10/})).toBeEnabled();
  await page.getByRole('button',{name:/Coffee machine · Lv. 9\/10/}).click();
  await expect(page.getByRole('button',{name:/Coffee machine · Lv. 10\/10/})).toBeDisabled();
- await page.getByRole('button',{name:/Caravan · Lv. 9\/10/}).click();
+ await page.getByRole('button',{name:/Caravan · Lv. 9\/10/}).click();await expect(page.locator('.caravan-reveal')).toContainText('KOWL Flagship');
  for(let i=1;i<10;i++)await page.getByRole('button',{name:new RegExp('Barista · Lv. '+i+'/10')}).click();
  await expect(page.getByRole('button',{name:/Barista · Lv. 10\/10/})).toBeDisabled();
  await page.getByRole('button',{name:'☕ Menu',exact:true}).click();

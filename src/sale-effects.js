@@ -16,7 +16,7 @@ export function createSaleEffects(scene, van, material) {
   else for(let i=0;i<3;i++){const puff=part(g,new T.SphereGeometry(.045,8,6),'#fff5df',(i-1)*.075,.3+i*.07,0);puff.scale.y=1.6;}
   return g;
  }
- function counter(){van.updateWorldMatrix(true,false);return van.localToWorld(new T.Vector3(.45,2.12,1.8));}
+ function counter(){van.updateWorldMatrix(true,false);return van.localToWorld(van.userData.counterOffset?.clone()??new T.Vector3(.45,2.12,1.8));}
  function brewing(on){
   if(steam){dispose(steam);steam=null;}
   if(!on)return;
@@ -32,6 +32,7 @@ export function createSaleEffects(scene, van, material) {
   return start;
  }
  function tick(dt,now){
+  if(steam)steam.position.copy(counter());
   if(steam)steam.children.forEach((p,i)=>{const t=(now*.0007+p.userData.phase)%1;p.position.set(Math.sin(t*5+i)*.1,.15+t*.65,Math.cos(t*4+i)*.06);p.scale.setScalar((1-t)*.8+.2);});
   for(let i=active.length-1;i>=0;i--){const a=active[i];a.age+=dt;const t=Math.min(1,a.age/a.duration),ease=t*t*(3-2*t);a.customer.g.updateWorldMatrix(true,true);const end=a.customer.body.localToWorld(new T.Vector3(.31,.85,.24));
    a.drink.position.lerpVectors(a.start,end,ease);a.drink.position.y+=Math.sin(t*Math.PI)*(reduced?0:.85);a.drink.rotation.z=Math.sin(t*Math.PI)*-.18;

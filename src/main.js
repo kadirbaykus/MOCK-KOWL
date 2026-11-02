@@ -1,4 +1,5 @@
 import './style.css';
+import {caravanStages} from './caravan.js';
 import {createPaymentEffects} from './payment-effects.js';
 import {createWorld} from './world.js';
 import {recipes,restore,canBrew,consume,sell,cost,upgrade,restock,MAX_LEVEL,brewSeconds,queueCapacity,arrivalSeconds} from './game.js';
@@ -8,6 +9,14 @@ let world;
 try{world=createWorld($('world'));}catch(e){const overlay=document.createElement('div');overlay.className='loading';overlay.innerHTML='<b>KOWL</b><p>Could not start the 3D scene.<br>Enable graphics acceleration in your browser settings and try again.</p>';document.body.append(overlay);throw e;}
 world.upgrade(state.van);
 const payments=createPaymentEffects(document.querySelector('.wallet'));
+$('world').addEventListener('caravan-upgraded',event=>{
+ const old=document.querySelector('.caravan-reveal');if(old)old.remove();
+ const banner=document.createElement('div');banner.className='caravan-reveal';banner.setAttribute('role','status');
+ const small=document.createElement('small');small.textContent='CARAVAN UPGRADED · LEVEL '+event.detail.level;
+ const title=document.createElement('strong');title.textContent=event.detail.name;banner.append(small,title);document.body.append(banner);
+ const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches??false;
+ const animation=banner.animate([{opacity:0,transform:'translate(-50%, -8px)'},{offset:.15,opacity:1,transform:'translate(-50%, 0)'},{offset:.8,opacity:1,transform:'translate(-50%, 0)'},{opacity:0,transform:'translate(-50%, -8px)'}],{duration:reduced?1500:2400});animation.onfinish=()=>banner.remove();animation.oncancel=()=>banner.remove();
+});
 function save(){try{localStorage.setItem('kowl-v2',JSON.stringify(state));}catch{$('save').textContent='Could not save';}}
 function say(text){$('notice').textContent=text;}
 function addCustomer(){if(queue.length>=queueCapacity(state))return;const choices=Object.keys(recipes).filter(k=>recipes[k].level<=state.machine);const kind=nextId===0?'espresso':choices[Math.floor(Math.random()*choices.length)];queue.push({id:nextId,kind});world.person(nextId++);render();}
@@ -31,9 +40,9 @@ function render(){
   const level=state[k],max=level>=MAX_LEVEL;
   const title=k==='machine'?'⚙️ Coffee machine':k==='van'?'🚐 Caravan':'🧑‍🍳 Barista';
   const nextRecipes=Object.values(recipes).filter(r=>r.level===level+1).map(r=>r.name).join(' & ');
-  const desc=k==='machine'?'Faster brewing'+(nextRecipes?' · Unlock '+nextRecipes:''):k==='van'?'+4 ₺ per coffee · Faster arrivals':level===0?'Hire a barista to brew orders automatically':'Faster brewing with each barista level';
+  const desc=k==='machine'?'Faster brewing'+(nextRecipes?' · Unlock '+nextRecipes:''):k==='van'?'Next: '+caravanStages[level+1]?.name+' · '+(caravanStages[level+1]?.feature??'')+' · +4 ₺ per coffee':level===0?'Hire a barista to brew orders automatically':'Faster brewing with each barista level';
   item(title+' · Lv. '+level+'/'+MAX_LEVEL,max?'Max level reached':desc+'<br>'+cost(state,k).toLocaleString('en-US')+' ₺ → Lv. '+(level+1),max||state.money<cost(state,k),()=>{
-   if(upgrade(state,k)){world.upgrade(state.van);say(title+' reached level '+state[k]+'!');save();render();}
+   if(upgrade(state,k)){if(k==='van')world.upgrade(state.van,{animate:true});say(title+' reached level '+state[k]+'!');save();render();}
   });
  }
  actions.scrollLeft=scrollLeft;

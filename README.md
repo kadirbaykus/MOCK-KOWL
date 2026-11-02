@@ -84,3 +84,7 @@ Playable prototype with 12 coffees, inventory, sales, 10 levels each for machine
 ## Sale animations
 
 The machine emits animated steam while brewing. A completed drink arcs from the counter into the customer's hand; the customer then leaves carrying it. Payment creates spinning gold coins flying toward the wallet, a floating income label, and a brief wallet pulse. These effects do not delay or duplicate saved sales. Temporary effects clean themselves up. The browser's reduced-motion preference shortens coffee delivery and removes flying coins.
+
+## Caravan evolution
+
+The starting level 0 cart grows through ten upgrades: Tiny Trailer, Weekend Camper, Street Café, Neighborhood Favorite, Coffee Truck, Mobile Café, Roastery on Wheels, Solar Café, Grand Coffee Lounge, and KOWL Flagship. Each level changes the actual model: body proportions, hatch, counter, canopy, driving cab, wheels, espresso stations, roaster, solar panels or premium signage. Buying a caravan level shrinks away the old model and reveals the new one with a spring animation, expanding light ring and stage-name banner. Loading a save displays the correct model immediately. Rapid upgrades clean up replaced geometry and sign textures, and reduced-motion preferences skip the 3D transformation.
