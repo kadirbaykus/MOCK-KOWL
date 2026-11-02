@@ -1,4 +1,5 @@
 import './style.css';
+import {createPaymentEffects} from './payment-effects.js';
 import {createWorld} from './world.js';
 import {recipes,restore,canBrew,consume,sell,cost,upgrade,restock,MAX_LEVEL,brewSeconds,queueCapacity,arrivalSeconds} from './game.js';
 const $=id=>document.getElementById(id);let state=restore(localStorage),tab='menu',queue=[],nextId=0,brew=null,arrival=0,lastActionSignature='';
@@ -6,6 +7,7 @@ $('ui').innerHTML=`<div class="top"><div class="brand"><span class="owl">🦉</s
 let world;
 try{world=createWorld($('world'));}catch(e){const overlay=document.createElement('div');overlay.className='loading';overlay.innerHTML='<b>KOWL</b><p>Could not start the 3D scene.<br>Enable graphics acceleration in your browser settings and try again.</p>';document.body.append(overlay);throw e;}
 world.upgrade(state.van);
+const payments=createPaymentEffects(document.querySelector('.wallet'));
 function save(){try{localStorage.setItem('kowl-v2',JSON.stringify(state));}catch{$('save').textContent='Could not save';}}
 function say(text){$('notice').textContent=text;}
 function addCustomer(){if(queue.length>=queueCapacity(state))return;const choices=Object.keys(recipes).filter(k=>recipes[k].level<=state.machine);const kind=nextId===0?'espresso':choices[Math.floor(Math.random()*choices.length)];queue.push({id:nextId,kind});world.person(nextId++);render();}
@@ -43,14 +45,14 @@ function render(){
  if(first&&state.selected!==first.kind)$('serve').disabled=true;
 }
 function buy(k){if(restock(state,k)){say('Supplies delivered. Coffee time!');save();render();}}
-function startBrew(auto=false){const first=queue[0];if(brew||!first)return;const kind=auto?first.kind:state.selected;if(kind!==first.kind||!consume(state,kind))return;brew={kind,start:performance.now(),duration:brewSeconds(state,kind)*1000};save();render();}
+function startBrew(auto=false){const first=queue[0];if(brew||!first)return;const kind=auto?first.kind:state.selected;if(kind!==first.kind||!consume(state,kind))return;brew={kind,start:performance.now(),duration:brewSeconds(state,kind)*1000};world.brewing(true);save();render();}
 $('serve').onclick=()=>startBrew();document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});
 $('left').onclick=()=>world.rotate(-.3);$('right').onclick=()=>world.rotate(.3);$('zoomIn').onclick=()=>world.zoom(.88);$('zoomOut').onclick=()=>world.zoom(1.12);
 addCustomer();addCustomer();
 setInterval(()=>{
  if(document.hidden)return;
  const now=performance.now();
- if(brew){const progress=Math.min(1,(now-brew.start)/brew.duration);$('brewFill').style.width=progress*100+'%';if(progress>=1){const income=sell(state,brew.kind);queue.shift();world.depart();brew=null;say('Enjoy your coffee! +'+income+' ₺ · '+state.sold+' coffees sold.');$('brewFill').style.width='0%';save();render();}}
+ if(brew){const progress=Math.min(1,(now-brew.start)/brew.duration);$('brewFill').style.width=progress*100+'%';if(progress>=1){const income=sell(state,brew.kind);queue.shift();world.brewing(false);payments.play(world.completeSale(brew.kind),income);brew=null;say('Enjoy your coffee! +'+income+' ₺ · '+state.sold+' coffees sold.');$('brewFill').style.width='0%';save();render();}}
  arrival+=.1;if(arrival>=arrivalSeconds(state)){arrival=0;addCustomer();}
  if(state.staff&&!brew&&queue.length)startBrew(true);
 },100);

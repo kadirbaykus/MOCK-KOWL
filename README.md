@@ -57,7 +57,7 @@ Progress is stored in this browser's localStorage under `kowl-v2`. Use the same 
 
 ```bash
 npm run build
-node --test tests/game.test.js tests/customers.test.js
+node --test tests/*.test.js
 npm exec playwright test
 ```
 
@@ -80,3 +80,7 @@ Commit source changes and the regenerated portable export. Do not commit node_mo
 ## Scope
 
 Playable prototype with 12 coffees, inventory, sales, 10 levels each for machine/caravan/barista, animated customers and local saves. Decorations are currently fixed. Buildable regions, sound, day/night, quest rewards and cloud saves are future features. No Hay Day assets are used.
+
+## Sale animations
+
+The machine emits animated steam while brewing. A completed drink arcs from the counter into the customer's hand; the customer then leaves carrying it. Payment creates spinning gold coins flying toward the wallet, a floating income label, and a brief wallet pulse. These effects do not delay or duplicate saved sales. Temporary effects clean themselves up. The browser's reduced-motion preference shortens coffee delivery and removes flying coins.

@@ -1,7 +1,7 @@
 import {test,expect} from '@playwright/test';
 test('3D scene, sales, persistence, restock and recipe unlock on tablet',async({page})=>{
  await page.setViewportSize({width:1024,height:768});const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');await expect(page.locator('canvas')).toBeVisible();await expect(page.locator('html')).toHaveAttribute('lang','en');await expect(page.getByRole('button',{name:'Rotate camera left'})).toBeVisible();await expect(page.locator('#goal')).toHaveText('Sell your first 5 coffees');await page.screenshot({path:'test-results/kowl-tablet.png'});
- await expect(page.locator('#money')).toHaveText('120 ₺');await page.locator('#serve').click();await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:6000});await page.reload();await expect(page.locator('#money')).toHaveText('144 ₺');
+ await expect(page.locator('#money')).toHaveText('120 ₺');await page.locator('#serve').click();await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:6000});await expect(page.locator('.payment-coin')).toHaveCount(6);await expect(page.locator('.sale-income')).toHaveText('+24 ₺');await expect(page.locator('.payment-effects span')).toHaveCount(0,{timeout:6000});await page.reload();await expect(page.locator('#money')).toHaveText('144 ₺');
  await page.getByRole('button',{name:'📦 Supplies'}).click();await page.getByRole('button',{name:/Coffee beans/}).click();await expect(page.locator('#money')).toHaveText('104 ₺');
  await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('kowl-v2'));s.money=1000;localStorage.setItem('kowl-v2',JSON.stringify(s));});await page.reload();await page.getByRole('button',{name:'✨ Upgrades',exact:true}).click();await page.getByRole('button',{name:/Coffee machine/}).click();await expect(page.locator('#money')).toHaveText('820 ₺');await page.getByRole('button',{name:'☕ Menu',exact:true}).click();await expect(page.getByRole('button',{name:/🥛 Latte/})).toBeEnabled();await page.locator('#right').click();expect(errors).toEqual([]);
 });
@@ -23,4 +23,10 @@ test('legacy barista save upgrades to level ten and the expanded menu scrolls',a
  await expect(page.locator('#menuHint')).toContainText('12 / 12');
  await page.reload();
  const s=await page.evaluate(()=>JSON.parse(localStorage.getItem('kowl-v2')));expect(s.machine).toBe(10);expect(s.van).toBe(10);expect(s.staff).toBe(10);expect(s.sold).toBeGreaterThanOrEqual(88);
+});
+
+test('reduced motion keeps sale feedback without flying coins',async({page})=>{
+ await page.emulateMedia({reducedMotion:'reduce'});await page.goto('/');await page.locator('#serve').click();
+ await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:6000});await expect(page.locator('.payment-coin')).toHaveCount(0);
+ await expect(page.locator('.payment-effects span')).toHaveCount(0,{timeout:3000});
 });

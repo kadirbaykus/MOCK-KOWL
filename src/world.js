@@ -2,6 +2,7 @@ import * as T from 'three';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
 import {buildCustomer} from './customers.js';
+import {createSaleEffects} from './sale-effects.js';
 export function createWorld(host){
  const scene=new T.Scene();scene.background=new T.Color('#a7d9f0');scene.fog=new T.Fog('#a7d9f0',40,90);
  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.NeutralToneMapping;renderer.toneMappingExposure=1.05;host.append(renderer.domElement);
@@ -58,12 +59,14 @@ export function createWorld(host){
  for(let i=0;i<300&&n<180;i++){const x=Math.sin(i*137.5)*10,z=Math.cos(i*91.7)*7;if((Math.abs(x)>4&&z<3)||z<-5){dummy.position.set(x,.39,z);dummy.rotation.y=i;dummy.updateMatrix();grass.setMatrixAt(n++,dummy.matrix);}}grass.count=n;scene.add(grass);
  box(.12,1.8,.12,'#ba7844',3.1,1.3,2.3);label('KOWL PARK',1.5,.35,'#f4c04f','#3d643d',3.1,2.12,2.4);
  // Customers walk in, queue, and leave after a sale.
+ const effects=createSaleEffects(scene,van,mat);
  const people=[];
  function person(id){const p=buildCustomer(id,mat);scene.add(p.g);p.g.position.set(8.6,.35,4.5);people.push(p);return p;}
- function depart(){const p=people.find(p=>!p.leaving);if(p)p.leaving=true;}
- let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.05);last=now;let index=0;for(let i=0;i<people.length;i++){const p=people[i];const target=p.leaving?new T.Vector3(-12,.35,4.5):new T.Vector3(.1,.35,2.65+(index++)*.88);const delta=target.clone().sub(p.g.position);if(delta.length()>.04){p.g.position.addScaledVector(delta.normalize(),Math.min(dt*p.appearance.speed,p.g.position.distanceTo(target)));p.g.rotation.y=Math.atan2(delta.x,delta.z);p.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.4);p.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.3);p.body.position.y=-.2*p.appearance.height+Math.abs(Math.sin(now*.009+p.appearance.phase))*.025;}else{p.legs.forEach(leg=>leg.rotation.x=0);p.arms.forEach(arm=>arm.rotation.x=0);p.g.rotation.y=Math.PI;}if(p.leaving&&p.g.position.x<-11){scene.remove(p.g);people.splice(i--,1);p.g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}}
+ function completeSale(kind){const p=people.find(p=>!p.leaving&&!p.receiving);const origin=effects.serve(p,kind);const projected=origin.clone().project(camera);return {x:(projected.x+1)*innerWidth/2,y:(1-projected.y)*innerHeight/2};}
+ let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.05);last=now;let index=0;for(let i=0;i<people.length;i++){const p=people[i];const target=p.receiving?p.g.position.clone():p.leaving?new T.Vector3(-12,.35,4.5):new T.Vector3(.1,.35,2.65+(index++)*.88);const delta=target.clone().sub(p.g.position);if(delta.length()>.04){p.g.position.addScaledVector(delta.normalize(),Math.min(dt*p.appearance.speed,p.g.position.distanceTo(target)));p.g.rotation.y=Math.atan2(delta.x,delta.z);p.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.4);p.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.3);p.body.position.y=-.2*p.appearance.height+Math.abs(Math.sin(now*.009+p.appearance.phase))*.025;}else{p.legs.forEach(leg=>leg.rotation.x=0);p.arms.forEach(arm=>arm.rotation.x=0);p.g.rotation.y=Math.PI;}if(p.leaving&&p.g.position.x<-11){scene.remove(p.g);people.splice(i--,1);p.g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}}
+ effects.tick(dt,now);for(const p of people)if(p.hasCoffee)p.arms[1].rotation.x=-1;
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();
- return {person,depart,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level)=>{van.scale.setScalar(1+Math.min(level,10)*.018);},renderer};
+ return {person,completeSale,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level)=>{van.scale.setScalar(1+Math.min(level,10)*.018);},renderer};
 }
