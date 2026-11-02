@@ -110,3 +110,11 @@ Daily reports count coffees delivered, revenue, ingredient cost and upgrade spen
 ## Responsive mobile play
 
 The game fills both 9:16 portrait and 16:9 landscape viewports, as well as intermediate phone/tablet sizes. Fluid typography and touch targets adapt to the available screen. Touch devices and short landscape windows use collapsible side drawers so the café remains visible. Drawers scroll independently, including on small iPhone-sized screens. Camera field of view updates on rotation, without resetting the game or camera controls. Dynamic viewport height and safe-area insets keep controls clear of iPhone notches, home indicators and changing browser chrome. Browser zoom remains available. Use the same game address and browser to keep progress when rotating.
+
+## Publish for players without GitHub accounts
+
+The repository includes `.github/workflows/deploy-pages.yml`. It tests and builds the game on pushes to `main`, then publishes `dist` through GitHub Pages. Relative Vite asset URLs support the `/MOCK-KOWL/` project path.
+
+One-time repository setting: **Settings → Pages → Build and deployment → Source → GitHub Actions**. Then open **Actions → Publish KOWL to GitHub Pages → Run workflow**, select `main`, and run it. After the deployment job is green, the expected public address is `https://kadirbaykus.github.io/MOCK-KOWL/`. Check the workflow's deployment link for the actual published URL. Later pushes to `main` publish automatically.
+
+Players need only a WebGL-capable browser and the public game link; they do not need a GitHub account or a running Codespace. Saves remain local to each player's browser. A first visit to the published URL starts a separate save from a Codespaces address; neither address overwrites the other's progress.
