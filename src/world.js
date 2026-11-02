@@ -8,6 +8,7 @@ import {createCustomerFlow} from './customer-flow.js';
 import {createSeats,cafeTables} from './seating.js';
 import {createTraffic,roadZ} from './traffic.js';
 import {createDayLight} from './day-light.js';
+import {cameraFov} from './viewport.js';
 export function createWorld(host){
  const scene=new T.Scene();scene.background=new T.Color('#a7d9f0');scene.fog=new T.Fog('#a7d9f0',40,90);
  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.NeutralToneMapping;renderer.toneMappingExposure=1.05;host.append(renderer.domElement);
@@ -75,7 +76,7 @@ export function createWorld(host){
  const people=[];
  const flow=createCustomerFlow(people,order=>host.dispatchEvent(new CustomEvent('customer-ordered',{detail:order})),{seats});
  function person(id,kind){const p=buildCustomer(id,mat);scene.add(p.g);p.g.position.set(7.8,.35,4.4);flow.add(p,kind);return p;}
- function completeSale(id,kind){const p=flow.claim(id);if(!p)return null;const origin=effects.serve(p,kind);const projected=origin.clone().project(camera);return {x:(projected.x+1)*innerWidth/2,y:(1-projected.y)*innerHeight/2};}
+ function completeSale(id,kind){const p=flow.claim(id);if(!p)return null;const origin=effects.serve(p,kind);const projected=origin.clone().project(camera);const bounds=renderer.domElement.getBoundingClientRect();return {x:bounds.left+(projected.x+1)*bounds.width/2,y:bounds.top+(1-projected.y)*bounds.height/2};}
  let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.25);last=now;if(document.hidden)return;
  flow.update(dt);
  for(let i=0;i<people.length;i++){
@@ -93,6 +94,8 @@ export function createWorld(host){
  caravan.tick(dt);effects.tick(dt,now);traffic.tick(dt);for(const p of people)if(p.hasCoffee&&p.stage!=='seated'){p.arms[1].rotation.x=-1;if(p.drink){p.drink.position.set(.31,.85,.24);p.drink.rotation.z=0;}}
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
- function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();
+ let previousWidth=0,previousHeight=0;
+ function resize(){const width=Math.max(1,host.clientWidth),height=Math.max(1,host.clientHeight);if(width===previousWidth&&height===previousHeight)return;previousWidth=width;previousHeight=height;renderer.setSize(width,height,false);camera.aspect=width/height;camera.fov=cameraFov(width,height);camera.updateProjectionMatrix();}
+ window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);const viewportObserver=new ResizeObserver(resize);viewportObserver.observe(host);resize();
  return {setTime:daylight.setTime,person,completeSale,canCollect:flow.canCollect,customerCount:flow.activeCount,orderStatus:flow.snapshot,readyCoffee:effects.ready,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level,options)=>caravan.setLevel(level,options),renderer};
 }
