@@ -39,7 +39,7 @@ export function createSaleEffects(scene, van, material) {
   for(let i=active.length-1;i>=0;i--){const a=active[i];a.age+=dt;const t=Math.min(1,a.age/a.duration),ease=t*t*(3-2*t);a.customer.g.updateWorldMatrix(true,true);const end=a.customer.body.localToWorld(new T.Vector3(.31,.85,.24));
    a.drink.position.lerpVectors(a.start,end,ease);a.drink.position.y+=Math.sin(t*Math.PI)*(reduced?0:.85);a.drink.rotation.z=Math.sin(t*Math.PI)*-.18;
    a.customer.arms[1].rotation.x=-.8*Math.sin(t*Math.PI/2);
-   if(t===1){a.drink.removeFromParent();a.customer.body.add(a.drink);a.drink.position.set(.31,.85,.24);a.drink.rotation.set(0,0,0);a.customer.hasCoffee=true;a.customer.receiving=false;a.customer.leaving=true;active.splice(i,1);}
+   if(t===1){a.drink.removeFromParent();a.customer.body.add(a.drink);a.drink.position.set(.31,.85,.24);a.drink.rotation.set(0,0,0);a.customer.drink=a.drink;a.customer.hasCoffee=true;a.customer.receiving=false;a.customer.served=true;active.splice(i,1);}
   }
  }
  return {brewing,ready,serve,tick};

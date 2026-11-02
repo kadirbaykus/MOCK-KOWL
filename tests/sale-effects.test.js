@@ -11,7 +11,7 @@ test('coffee arcs to the receiving customer and is carried on departure',()=>{
  const customer={g,body,arms:[new T.Group(),new T.Group()],receiving:false,leaving:false};
  const origin=effects.serve(customer,'latte');assert.ok(Number.isFinite(origin.x));assert.equal(customer.receiving,true);assert.equal(customer.leaving,false);
  const drink=scene.children.find(o=>o!==g&&o!==scene.children[0]);const start=drink.position.clone();effects.tick(.45,450);assert.ok(drink.position.distanceTo(start)>.1);
- effects.tick(.6,1050);assert.equal(customer.receiving,false);assert.equal(customer.leaving,true);assert.equal(customer.hasCoffee,true);assert.equal(drink.parent,body);assert.equal(scene.children.length,2);
+ effects.tick(.6,1050);assert.equal(customer.receiving,false);assert.equal(customer.leaving,false);assert.equal(customer.served,true);assert.equal(customer.hasCoffee,true);assert.equal(drink.parent,body);assert.equal(scene.children.length,2);
  effects.tick(1,2050);assert.equal(body.children.length,1);
 });
 test('a ready coffee waits on the counter until explicitly served',()=>{

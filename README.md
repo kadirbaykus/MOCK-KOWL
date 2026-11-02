@@ -92,3 +92,9 @@ The starting level 0 cart grows through ten upgrades: Tiny Trailer, Weekend Camp
 ## Order kiosk and pickup
 
 Customers first walk to the separate touchscreen kiosk diagonally in front of the caravan. Only the customer at the screen can submit an order. They then walk along a separate approach into the caravan's FIFO pickup queue. Drinks may finish while a customer is still walking: the prepared cup waits visibly on the caravan counter, with no payment or departure until the matching customer reaches the front of pickup. Delivery and coin effects then play as usual. The interface shows kiosk/pickup counts and a ready-coffee status. Customers and outstanding orders are session-local; cash, inventory and upgrade progress keep using the existing save format.
+
+## Café seating and occasional traffic
+
+Served guests reserve one of six chairs, walk to their table, sit with bent knees and sip their drink. Visits last a randomly selected 18–35 seconds after seating. Guests then stand, free the chair and leave; later guests can reuse it. If all chairs are occupied, a guest leaves with their takeaway coffee. Seated guests do not consume order-queue capacity.
+
+A separate road lane in front of the café carries colorful cars and vans in both directions. One vehicle passes at a time, followed by a random 25–55 second gap after it leaves. The vehicle lane is separated from customer entry, kiosk and pickup routes. Vehicle geometry is disposed after leaving the scene. Café visits and traffic pause while the tab is hidden.

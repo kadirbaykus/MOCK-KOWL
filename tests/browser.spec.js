@@ -38,3 +38,9 @@ test('ready coffee waits for the kiosk customer to reach the caravan',async({pag
  await expect(page.locator('#orderStatus')).toHaveAttribute('data-ready','true',{timeout:6000});await expect(page.locator('#money')).toHaveText('120 ₺');
  await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:15000});await expect(page.locator('#orderStatus')).toHaveAttribute('data-ready','false');
 });
+
+test('a customer takes their coffee to a table without blocking the next order',async({page})=>{
+ await page.setViewportSize({width:390,height:844});await page.goto('/');await page.locator('#serve').click();await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:15000});
+ await expect.poll(async()=>Number(await page.locator('#orderStatus').getAttribute('data-seated')),{timeout:30000}).toBeGreaterThan(0);
+ await expect(page.locator('#orderStatus')).toContainText('SEATED: 1/6');await expect(page.locator('#serve')).toBeEnabled({timeout:15000});
+});

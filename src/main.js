@@ -70,8 +70,8 @@ setInterval(()=>{
    if(origin){const income=sell(state,brew.kind);queue.shift();payments.play(origin,income);brew=null;say('Enjoy your coffee! +'+income+' ₺ · '+state.sold+' coffees sold.');$('brewFill').style.width='0%';save();render();}
   }
  }
- const status=world.orderStatus();const orderStatus=$('orderStatus');orderStatus.dataset.kiosk=status.kiosk;orderStatus.dataset.pickup=status.pickup;orderStatus.dataset.ready=String(!!brew?.ready);
- const statusText='ORDER KIOSK: '+status.kiosk+' · PICKUP: '+status.pickup+(brew?.ready?' · COFFEE READY':'');if(orderStatus.textContent!==statusText)orderStatus.textContent=statusText;
+ const status=world.orderStatus();const orderStatus=$('orderStatus');orderStatus.dataset.kiosk=status.kiosk;orderStatus.dataset.pickup=status.pickup;orderStatus.dataset.ready=String(!!brew?.ready);orderStatus.dataset.seated=status.seated;
+ const statusText='ORDER KIOSK: '+status.kiosk+' · PICKUP: '+status.pickup+' · SEATED: '+status.seated+'/'+status.seats+(brew?.ready?' · COFFEE READY':'');if(orderStatus.textContent!==statusText)orderStatus.textContent=statusText;
  arrival+=.1;if(arrival>=arrivalSeconds(state)){arrival=0;addCustomer();}
  if(state.staff&&!brew&&queue.length)startBrew(true);
 },100);

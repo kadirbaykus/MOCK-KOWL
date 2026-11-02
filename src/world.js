@@ -5,6 +5,8 @@ import {buildCustomer} from './customers.js';
 import {createSaleEffects} from './sale-effects.js';
 import {createCaravanController} from './caravan.js';
 import {createCustomerFlow} from './customer-flow.js';
+import {createSeats,cafeTables} from './seating.js';
+import {createTraffic,roadZ} from './traffic.js';
 export function createWorld(host){
  const scene=new T.Scene();scene.background=new T.Color('#a7d9f0');scene.fog=new T.Fog('#a7d9f0',40,90);
  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.NeutralToneMapping;renderer.toneMappingExposure=1.05;host.append(renderer.domElement);
@@ -37,7 +39,7 @@ export function createWorld(host){
  // Chalk menu and outdoor seating.
  const menu=box(.9,1.35,.1,'#a87951',-4,.95,1.2);menu.rotation.z=-.1;label('COFFEE',.75,.3,'#354d41','#ffefc7',-4,1.25,1.26);label('24 ₺',.7,.3,'#354d41','#ffefc7',-4,.85,1.26);
  function table(x,z){cyl(.63,.12,'#d2a76a',x,1.15,z);cyl(.08,1,'#71634b',x,.6,z);for(const dx of [-.95,.95]){cyl(.33,.13,'#35a89c',x+dx,.65,z);for(const dz of [-.16,.16])cyl(.045,.6,'#7c7057',x+dx,.3,z+dz);}}
- table(5,0);table(7.8,1.8);table(-6,2);
+ cafeTables.forEach(t=>table(t.x,t.z));
  const lights=[];for(let i=0;i<9;i++){const x=-4+i*1.1,y=4.9-Math.sin(i/8*Math.PI)*.65;sphere(.1,i%2?'#fff0a6':'#e9bc70',x,y,1.5);lights.push(new T.Vector3(x,y+.12,1.5));}scene.add(new T.Line(new T.BufferGeometry().setFromPoints(lights),new T.LineBasicMaterial({color:'#5b654e'})));
  for(const x of [-4,4.8])cyl(.045,4.8,'#967550',x,2.6,1.5);
  // Colorful garden beds, hedges, café umbrellas and a small park pond.
@@ -64,20 +66,29 @@ export function createWorld(host){
  for(let i=0;i<4;i++){const marker=mesh(new T.ConeGeometry(.13,.04,3),'#fff0b9',2.9-i*.7,.39,3.5-i*.42);marker.rotation.y=-.8;}
  // Customers walk in, queue, and leave after a sale.
  const effects=createSaleEffects(scene,van,mat);
+ // The car lane is outside the café's pedestrian approach and pickup queues.
+ box(35,.12,2.6,'#7c8983',0,.25,roadZ);box(35,.12,.18,'#efe1bd',0,.3,roadZ-1.4);
+ for(let i=-8;i<=8;i++)box(.85,.015,.07,'#f6e7b6',i*2,.32,roadZ);
+ const traffic=createTraffic(scene,mat),seats=createSeats();
  const people=[];
- const flow=createCustomerFlow(people,order=>host.dispatchEvent(new CustomEvent('customer-ordered',{detail:order})));
+ const flow=createCustomerFlow(people,order=>host.dispatchEvent(new CustomEvent('customer-ordered',{detail:order})),{seats});
  function person(id,kind){const p=buildCustomer(id,mat);scene.add(p.g);p.g.position.set(7.8,.35,4.4);flow.add(p,kind);return p;}
  function completeSale(id,kind){const p=flow.claim(id);if(!p)return null;const origin=effects.serve(p,kind);const projected=origin.clone().project(camera);return {x:(projected.x+1)*innerWidth/2,y:(1-projected.y)*innerHeight/2};}
- let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.12);last=now;
+ let last=performance.now();function tick(now){const dt=Math.min((now-last)/1000,.25);last=now;if(document.hidden)return;
  flow.update(dt);
  for(let i=0;i<people.length;i++){
   const p=people[i];
-  if(p.moving){p.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.4);p.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.3);p.body.position.y=-.2*p.appearance.height+Math.abs(Math.sin(now*.009+p.appearance.phase))*.025;}
-  else{p.legs.forEach(leg=>leg.rotation.x=0);p.arms.forEach(arm=>arm.rotation.x=0);if(p.stage==='ordering')p.arms[1].rotation.x=-.9+Math.sin(now*.008)*.1;}
+  p.knees.forEach(knee=>knee.rotation.x=0);
+  if(p.stage==='seated'){
+   p.body.position.y=.5-.76*p.appearance.height;p.legs.forEach(leg=>leg.rotation.x=-Math.PI/2);p.knees.forEach(knee=>knee.rotation.x=Math.PI/2);
+   const sip=Math.max(0,Math.sin(p.seatedTime*1.3))**8;p.arms[1].rotation.x=-1-sip*.45;
+   if(p.drink){p.drink.position.set(.3-sip*.11,.85+sip*.42,.24+sip*.06);p.drink.rotation.z=-sip*.15;}
+  }else if(p.moving){p.legs.forEach((leg,j)=>leg.rotation.x=Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.4);p.arms.forEach((arm,j)=>arm.rotation.x=-Math.sin(now*.009+p.appearance.phase+j*Math.PI)*.3);p.body.position.y=-.2*p.appearance.height+Math.abs(Math.sin(now*.009+p.appearance.phase))*.025;}
+  else{p.body.position.y=-.2*p.appearance.height;p.legs.forEach(leg=>leg.rotation.x=0);p.arms.forEach(arm=>arm.rotation.x=0);if(p.stage==='ordering')p.arms[1].rotation.x=-.9+Math.sin(now*.008)*.1;}
   if(p.leaving&&p.g.position.x<-11){scene.remove(p.g);people.splice(i--,1);p.g.traverse(o=>{if(o.isMesh)o.geometry.dispose();});}
  }
  const status=flow.snapshot();kioskScreen.scale.setScalar(status.ordering?1+Math.sin(now*.006)*.03:1);
- caravan.tick(dt);effects.tick(dt,now);for(const p of people)if(p.hasCoffee)p.arms[1].rotation.x=-1;
+ caravan.tick(dt);effects.tick(dt,now);traffic.tick(dt);for(const p of people)if(p.hasCoffee&&p.stage!=='seated'){p.arms[1].rotation.x=-1;if(p.drink){p.drink.position.set(.31,.85,.24);p.drink.rotation.z=0;}}
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();

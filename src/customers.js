@@ -58,16 +58,18 @@ export function buildCustomer(id, material) {
  if(a.glasses){for(const x of [-.075,.075])part(new T.TorusGeometry(.057,.012,5,12),'#493b43',x,1.46,.208);capsule(.01,.04,'#493b43',0,1.46,.21).rotation.z=Math.PI/2;}
  if(a.presentation==='feminine')for(const x of [-.2,.2])ball(.025,'#efbb46',x,1.37,.04);
  if(a.skirt)part(new T.CylinderGeometry(.23,.35,.37,14),a.shirt,0,.69,0);
- const legs=[],arms=[];
+ const legs=[],knees=[],arms=[];
  for(const side of [-1,1]) {
   const pivot=new T.Group();pivot.position.set(side*.13,.76,0);body.add(pivot);legs.push(pivot);
-  capsule(.085,.3,a.skirt?a.skin:a.trousers,0,-.22,0,pivot);
-  capsule(.09,.09,'#faf2dc',0,-.43,.06,pivot).rotation.x=Math.PI/2;
+  capsule(.085,.12,a.skirt?a.skin:a.trousers,0,-.12,0,pivot);
+  const knee=new T.Group();knee.position.y=-.25;pivot.add(knee);knees.push(knee);
+  capsule(.075,.1,a.skirt?a.skin:a.trousers,0,-.1,0,knee);
+  capsule(.09,.09,'#faf2dc',0,-.23,.06,knee).rotation.x=Math.PI/2;
   const arm=new T.Group();arm.position.set(side*.27,1.13,0);body.add(arm);arms.push(arm);
   capsule(.085,.12,a.shirt,0,-.08,0,arm);capsule(.06,.16,a.skin,0,-.26,0,arm);ball(.065,a.skin,0,-.38,.015,arm);
  }
  if(a.bag){capsule(.025,.53,'#8d6243',.3,1.02,.12).rotation.z=-.22;ball(.15,'#c99354',.35,.72,.05).scale.set(.65,1,1);}
  // Keep feet on the paving while retaining independent body proportions.
  body.position.y=-.2*a.height;
- return {g:group,body,legs,arms,id,appearance:a,leaving:false};
+ return {g:group,body,legs,knees,arms,id,appearance:a,leaving:false};
 }
