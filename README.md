@@ -43,3 +43,7 @@ Yalnızca bu proje dosyalarını seçerek commit oluştur. node_modules ve dist 
 ## Kolay aktarım: tek dosya
 
 `npm run build` ardından `node scripts/export.mjs` çalıştırmak `export/index.html` üretir. Bu dosya derlenmiş gerçek 3B oyunun tamamını içerir; ayrı kütüphane indirmez. Mevcut basit HTML dosyanın yedeğini aldıktan sonra yerine koyabilirsin. Codespaces'te bu dosyanın bulunduğu klasörde `python3 -m http.server 8000` çalıştır ve 8000 portunu tarayıcıda aç. Kaynak kodunu geliştirmek için `src/` ve Vite akışını kullan.
+
+## Canlı park ve çeşitli müşteriler
+
+Daha canlı yeşil/turkuaz/mercan paleti, yuvarlatılmış karavan parçaları, çiçeklikler, şemsiyeler, banklar, gölet ve toplu çizilen çimenler eklendi. Müşteriler farklı boy, vücut yapısı, ten, saç rengi/modeli, kıyafet ve kadınsı/erkeksi görünümlerle oluşturulur. Bazılarında gözlük, şapka, küpe veya çanta bulunur. Model üretimi yereldir; dışarıdan karakter varlığı indirilmez. Kol ve bacak animasyonları vardır. `node --test tests/customers.test.js tests/game.test.js` karakter çeşitliliğini ve ekonomiyi doğrular. Tabletin performansı donanımına göre değişebilir.
