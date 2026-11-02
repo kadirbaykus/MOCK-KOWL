@@ -1,0 +1,2 @@
+import {test,expect} from '@playwright/test';
+test('portable single HTML runs with no external runtime dependencies',async({page})=>{const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/export/index.html');await expect(page.locator('canvas')).toBeVisible();await page.locator('#serve').click();await expect(page.locator('#money')).toHaveText('144 ₺',{timeout:6000});expect(errors).toEqual([]);});
