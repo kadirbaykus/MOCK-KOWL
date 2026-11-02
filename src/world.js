@@ -65,5 +65,5 @@ export function createWorld(host){
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();
- return {person,depart,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level)=>{van.scale.setScalar(1+level*.04);},renderer};
+ return {person,depart,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level)=>{van.scale.setScalar(1+Math.min(level,10)*.018);},renderer};
 }

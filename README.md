@@ -1,49 +1,82 @@
-# KOWL — Kahve Karavanı
+# KOWL — Coffee Caravan
 
-Tarayıcıda oynanan gerçek 3B kahve karavanı tycoon prototipi. Three.js ile özgün, sıcak renkli bir park sahnesi; KOWL karavanı ve üç boyutlu baykuş tabelası içerir. Harici görsel veya ücretli API gerektirmez.
+A real 3D browser coffee-caravan tycoon built with Three.js and Vite. Run a colorful café in a small park, serve walking customers, manage supplies, and upgrade your business. All interface text is in English. Models are generated locally; no paid APIs, external character assets, or secrets are required.
 
-## GitHub Codespaces'te çalıştır
+## Run in GitHub Codespaces
 
-Terminali bu dosyanın ve package.json'ın bulunduğu klasörde aç:
+Open a terminal in the directory containing this README and package.json:
 
 ```bash
 npm ci
 npm run dev -- --port 5173
 ```
 
-Bağlantı Noktaları / Ports bölümünden 5173 satırındaki tarayıcı simgesini aç. Bu sunucu terminal açıkken çalışır. WebGL destekleyen güncel Chrome, Brave, Edge veya Safari kullan. Uygulama kurulumu ve Android emülatörü gerekmez.
+Open port 5173 through the Codespaces Ports panel. Keep the server running. Use a current browser with WebGL and graphics acceleration. No app installation or Android emulator is required.
 
-## Oyna
+## Play
 
-- Sahneyi sürükleyerek döndür; iki parmak veya +/− ile yakınlaş.
-- Sıradaki müşterinin istediği tarifi Menü bölümünden seç, kahveyi hazırla.
-- Tedarik bölümünden çekirdek ve süt al.
-- Makineyi geliştirerek latte ve mocha tariflerini aç.
-- Karavanı büyüt, satış kazancını artır; barista alarak üretimi otomatikleştir.
-- İlerleme bu tarayıcının localStorage alanına kaydedilir. Gizli sekmede veya farklı adreste kayıt paylaşılmaz. Bulut kaydı yoktur.
+- Drag the scene to rotate the camera. Pinch or use +/− to zoom.
+- Check the next customer's order, select its recipe, and brew.
+- Swipe the recipe cards sideways to explore the full menu.
+- Buy beans and milk in Supplies. Each recipe lists ingredients, selling price and current preparation time.
+- Use Upgrades to grow the business. All three upgrade tracks reach level 10.
 
-## Kontroller
+### Coffee menu
+
+| Machine level | New recipes |
+| --- | --- |
+| 0 | Espresso |
+| 1 | Latte, Americano |
+| 2 | Mocha |
+| 3 | Cappuccino |
+| 4 | Flat White |
+| 5 | Cortado |
+| 6 | Iced Latte |
+| 7 | Macchiato |
+| 8 | Cold Brew |
+| 9 | Café au Lait |
+| 10 | KOWL Signature |
+
+### Upgrades
+
+- **Machine, levels 0–10:** unlock recipes and reduce brewing time by 4.5% of base time per level.
+- **Caravan, levels 0–10:** add 4 lira per coffee per level, improve arrivals, and add one queue slot every two levels.
+- **Barista, levels 0–10:** level 1 hires an automatic brewer; every level reduces brewing time by 3.5% before combining with the machine modifier. Minimum preparation time is 1.1 seconds.
+
+Upgrade prices increase by 45% per level and round up to the nearest 10 lira. Existing saves keep cash, stock, sales and upgrades. A previously hired barista becomes level 1; an unhired barista becomes level 0.
+
+## Graphics and customers
+
+A rounded turquoise caravan, owl emblem, striped awning, vivid park colors, flowers, umbrellas, benches and a pond. Customers have varied height, build, skin, hair, clothing and feminine/masculine presentations. Some wear hats, glasses, earrings or bags. Arms and legs animate while walking. Performance depends on device hardware.
+
+## Save progress
+
+Progress is stored in this browser's localStorage under `kowl-v2`. Use the same browser and game address to retain it. Saves do not transfer between addresses or devices, and are not cloud saves. Incognito mode or clearing site data may remove progress.
+
+## Validate
 
 ```bash
 npm run build
-node --test tests/game.test.js
+node --test tests/game.test.js tests/customers.test.js
 npm exec playwright test
 ```
 
-Tarayıcı testleri için sistem Chromium'u `/usr/bin/chromium` yolunda beklenir. Farklı bir sistemde `CHROMIUM_PATH` belirt veya Playwright yapılandırmasını kendi tarayıcı kurulumuna göre ayarla.
+Browser tests use Chromium at `/usr/bin/chromium`; set `CHROMIUM_PATH` for a different installed executable. They cover sales, persistence, restocking, recipe unlocks, legacy barista migration, all upgrade tracks, scrolling the expanded menu on a phone, and the portable build.
 
-## GitHub'a kaydet
+## Portable single-file build
 
-Yalnızca bu proje dosyalarını seçerek commit oluştur. node_modules ve dist yükleme. Codespaces'te kaydetmek tek başına GitHub'a göndermez; Source Control bölümündeki Commit ve Sync Changes işlemlerini kullan.
+```bash
+npm run build
+node scripts/export.mjs
+python3 -m http.server 8000 --directory export
+```
 
-## Kapsam
+Open port 8000 using Codespaces. `export/index.html` bundles the game, styles and 3D library. Regenerate it after changing source. The `src/` files are the editable source; `export/index.html` is generated output.
 
-İlk oynanabilir prototip: üç tarif, stok, müşteri sırası, satış, üçer makine ve karavan seviyesi, otomatik barista ve yerel kayıt. Hay Day varlıkları kullanılmaz. Bölgeler, dekorasyon yerleştirme, ses, gün/gece, görev ödülleri ve bulut kaydı sonraki sürümler içindir. Bu proje GitHub Pages'e henüz yayımlanmamıştır.
+## GitHub workflow
 
-## Kolay aktarım: tek dosya
+Commit source changes and the regenerated portable export. Do not commit node_modules, dist, or test results. Saving a file in Codespaces alone does not push it to GitHub; use Commit and Sync Changes. This repository has not been deployed to GitHub Pages.
 
-`npm run build` ardından `node scripts/export.mjs` çalıştırmak `export/index.html` üretir. Bu dosya derlenmiş gerçek 3B oyunun tamamını içerir; ayrı kütüphane indirmez. Mevcut basit HTML dosyanın yedeğini aldıktan sonra yerine koyabilirsin. Codespaces'te bu dosyanın bulunduğu klasörde `python3 -m http.server 8000` çalıştır ve 8000 portunu tarayıcıda aç. Kaynak kodunu geliştirmek için `src/` ve Vite akışını kullan.
+## Scope
 
-## Canlı park ve çeşitli müşteriler
-
-Daha canlı yeşil/turkuaz/mercan paleti, yuvarlatılmış karavan parçaları, çiçeklikler, şemsiyeler, banklar, gölet ve toplu çizilen çimenler eklendi. Müşteriler farklı boy, vücut yapısı, ten, saç rengi/modeli, kıyafet ve kadınsı/erkeksi görünümlerle oluşturulur. Bazılarında gözlük, şapka, küpe veya çanta bulunur. Model üretimi yereldir; dışarıdan karakter varlığı indirilmez. Kol ve bacak animasyonları vardır. `node --test tests/customers.test.js tests/game.test.js` karakter çeşitliliğini ve ekonomiyi doğrular. Tabletin performansı donanımına göre değişebilir.
+Playable prototype with 12 coffees, inventory, sales, 10 levels each for machine/caravan/barista, animated customers and local saves. Decorations are currently fixed. Buildable regions, sound, day/night, quest rewards and cloud saves are future features. No Hay Day assets are used.
