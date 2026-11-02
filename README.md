@@ -118,3 +118,7 @@ The repository includes `.github/workflows/deploy-pages.yml`. It tests and build
 One-time repository setting: **Settings → Pages → Build and deployment → Source → GitHub Actions**. Then open **Actions → Publish KOWL to GitHub Pages → Run workflow**, select `main`, and run it. After the deployment job is green, the expected public address is `https://kadirbaykus.github.io/MOCK-KOWL/`. Check the workflow's deployment link for the actual published URL. Later pushes to `main` publish automatically.
 
 Players need only a WebGL-capable browser and the public game link; they do not need a GitHub account or a running Codespace. Saves remain local to each player's browser. A first visit to the published URL starts a separate save from a Codespaces address; neither address overwrites the other's progress.
+
+## Always-visible inventory and order readout
+
+A compact HUD below the clock displays beans, milk and the next unfulfilled customer order even when the Café and Business drawers are closed. Counts update immediately when brewing consumes ingredients and when supplies arrive. The order status distinguishes waiting for kiosk orders, selecting a recipe, low stock, brewing, and coffee ready for pickup. Empty resources receive a warning tint; low-stock text points players to Supplies. The HUD uses a single compact row on short landscape screens.

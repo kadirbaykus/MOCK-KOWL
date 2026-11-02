@@ -4,6 +4,11 @@ export const uiMarkup=`
  <div class="clock" aria-label="Game clock"><small id="gameDay">DAY 1 · DAYTIME</small><strong id="gameClock">☀️ 06:00</strong><span>Day / night: 2 min each</span></div>
  <div class="wallet"><span>🪙</span><div><small>YOUR CASH</small><b id="money"></b></div><span class="pill" id="sold"></span></div>
 </header>
+<section class="live-hud" aria-label="Inventory and next order">
+ <div class="inventory-counter"><span aria-hidden="true">🫘</span><div><small>Beans</small><strong id="hudBeans">0</strong></div></div>
+ <div class="inventory-counter"><span aria-hidden="true">🥛</span><div><small>Milk</small><strong id="hudMilk">0</strong></div></div>
+ <div class="next-order" role="status" aria-live="polite" aria-atomic="true"><small>Next order</small><strong id="hudOrder">Waiting for orders</strong><span id="hudOrderStatus">Customers order at the kiosk</span></div>
+</section>
 <aside class="left drawer" id="cafeDrawer" aria-label="Café controls">
  <section class="panel shop-panel">
   <div class="drawer-heading"><h2>☕ Your café</h2><button class="drawer-close" data-close="cafeDrawer" aria-label="Close café controls">×</button></div>

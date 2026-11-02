@@ -56,11 +56,21 @@ function render(){
  }
  }
  renderReport();
+ renderLiveHud();
  const first=queue[0];$('stock').textContent='🫘 '+state.beans+' beans · 🥛 '+state.milk+' milk'+(first?' | Next: '+recipes[first.kind].name+' ('+queue.length+' in line)':' | Waiting for kiosk orders');
  $('serve').disabled=!!brew||!first||!canBrew(state,state.selected);
  $('serve').textContent=brew?(brew.ready?'☕ Ready · Waiting at pickup':'⏳ Brewing…'):!first?'Waiting for kiosk orders':state.selected!==first.kind?'Select '+recipes[first.kind].name+' first':'☕ Brew '+recipes[first.kind].name;
  // A recipe must match the customer's order; no stock is wasted on a mismatch.
  if(first&&state.selected!==first.kind)$('serve').disabled=true;
+}
+function renderLiveHud(){
+ $('hudBeans').textContent=state.beans.toLocaleString('en-US');$('hudMilk').textContent=state.milk.toLocaleString('en-US');
+ $('hudBeans').closest('.inventory-counter').classList.toggle('empty',state.beans===0);$('hudMilk').closest('.inventory-counter').classList.toggle('empty',state.milk===0);
+ const first=queue[0],recipe=first?recipes[first.kind]:null;
+ const title=recipe?recipe.icon+' '+recipe.name:'Waiting for orders';
+ const status=!first?'Customers order at the kiosk':brew?(brew.ready?'Ready · Waiting for pickup':'Brewing…'):!canBrew(state,first.kind)?'Low stock · Open Supplies':state.selected!==first.kind?'Select '+recipe.name+' in Menu':'Ready to brew · '+queue.length+' in line';
+ if($('hudOrder').textContent!==title)$('hudOrder').textContent=title;
+ if($('hudOrderStatus').textContent!==status)$('hudOrderStatus').textContent=status;
 }
 function renderReport(){
  const time=clockAt(state.clock),report=state.report;
