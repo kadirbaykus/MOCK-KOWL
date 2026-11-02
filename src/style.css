@@ -11,3 +11,4 @@
 .caravan-reveal{position:fixed;z-index:9;left:50%;top:110px;transform:translateX(-50%);pointer-events:none;text-align:center;border:2px solid #f0cf77;border-radius:20px;background:#fff8e7ee;box-shadow:0 8px 28px #2b5a3a33;padding:14px 24px;max-width:90vw;color:#315e4c}
 .caravan-reveal small{display:block;font-size:10px;letter-spacing:1.5px;color:#ad7e2d;margin-bottom:5px}.caravan-reveal strong{font-size:23px;display:block}
 @media(max-width:700px){.caravan-reveal{top:88px;padding:10px 15px}.caravan-reveal strong{font-size:18px}}
+.order-status{font-size:10px;font-weight:bold;color:#2e806a;background:#e5efda;border-radius:9px;padding:7px 8px;margin-top:10px;line-height:1.6}

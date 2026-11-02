@@ -88,3 +88,7 @@ The machine emits animated steam while brewing. A completed drink arcs from the 
 ## Caravan evolution
 
 The starting level 0 cart grows through ten upgrades: Tiny Trailer, Weekend Camper, Street Café, Neighborhood Favorite, Coffee Truck, Mobile Café, Roastery on Wheels, Solar Café, Grand Coffee Lounge, and KOWL Flagship. Each level changes the actual model: body proportions, hatch, counter, canopy, driving cab, wheels, espresso stations, roaster, solar panels or premium signage. Buying a caravan level shrinks away the old model and reveals the new one with a spring animation, expanding light ring and stage-name banner. Loading a save displays the correct model immediately. Rapid upgrades clean up replaced geometry and sign textures, and reduced-motion preferences skip the 3D transformation.
+
+## Order kiosk and pickup
+
+Customers first walk to the separate touchscreen kiosk diagonally in front of the caravan. Only the customer at the screen can submit an order. They then walk along a separate approach into the caravan's FIFO pickup queue. Drinks may finish while a customer is still walking: the prepared cup waits visibly on the caravan counter, with no payment or departure until the matching customer reaches the front of pickup. Delivery and coin effects then play as usual. The interface shows kiosk/pickup counts and a ready-coffee status. Customers and outstanding orders are session-local; cash, inventory and upgrade progress keep using the existing save format.

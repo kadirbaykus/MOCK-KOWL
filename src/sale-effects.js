@@ -2,7 +2,7 @@ import * as T from 'three';
 
 export function createSaleEffects(scene, van, material) {
  const active=[];
- let steam=null;
+ let steam=null,prepared=null;
  const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
  function dispose(group){group.removeFromParent();const geometries=new Set();group.traverse(o=>{if(o.geometry)geometries.add(o.geometry);});geometries.forEach(g=>g.dispose());}
  function part(group,geometry,color,x,y,z){const m=new T.Mesh(geometry,material(color));m.position.set(x,y,z);group.add(m);return m;}
@@ -23,15 +23,17 @@ export function createSaleEffects(scene, van, material) {
   steam=new T.Group();steam.position.copy(counter());scene.add(steam);
   for(let i=0;i<5;i++){const m=part(steam,new T.SphereGeometry(.055,8,6),'#fff8e7',0,.2,0);m.userData.phase=i/5;}
  }
+ function ready(kind){if(prepared){dispose(prepared);prepared=null;}if(kind){prepared=cup(kind);prepared.position.copy(counter());scene.add(prepared);}}
  function serve(customer,kind){
   if(!customer)return counter();
   customer.receiving=true;
-  const drink=cup(kind),start=counter();drink.position.copy(start);scene.add(drink);
+  const drink=prepared??cup(kind),start=counter();prepared=null;drink.position.copy(start);scene.add(drink);
   const duration=reduced?.15:.95;
   active.push({age:0,duration,drink,customer,start});
   return start;
  }
  function tick(dt,now){
+  if(prepared)prepared.position.copy(counter());
   if(steam)steam.position.copy(counter());
   if(steam)steam.children.forEach((p,i)=>{const t=(now*.0007+p.userData.phase)%1;p.position.set(Math.sin(t*5+i)*.1,.15+t*.65,Math.cos(t*4+i)*.06);p.scale.setScalar((1-t)*.8+.2);});
   for(let i=active.length-1;i>=0;i--){const a=active[i];a.age+=dt;const t=Math.min(1,a.age/a.duration),ease=t*t*(3-2*t);a.customer.g.updateWorldMatrix(true,true);const end=a.customer.body.localToWorld(new T.Vector3(.31,.85,.24));
@@ -40,5 +42,5 @@ export function createSaleEffects(scene, van, material) {
    if(t===1){a.drink.removeFromParent();a.customer.body.add(a.drink);a.drink.position.set(.31,.85,.24);a.drink.rotation.set(0,0,0);a.customer.hasCoffee=true;a.customer.receiving=false;a.customer.leaving=true;active.splice(i,1);}
   }
  }
- return {brewing,serve,tick};
+ return {brewing,ready,serve,tick};
 }

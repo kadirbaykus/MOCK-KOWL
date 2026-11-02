@@ -14,3 +14,8 @@ test('coffee arcs to the receiving customer and is carried on departure',()=>{
  effects.tick(.6,1050);assert.equal(customer.receiving,false);assert.equal(customer.leaving,true);assert.equal(customer.hasCoffee,true);assert.equal(drink.parent,body);assert.equal(scene.children.length,2);
  effects.tick(1,2050);assert.equal(body.children.length,1);
 });
+test('a ready coffee waits on the counter until explicitly served',()=>{
+ const {scene,effects}=setup();effects.ready('espresso');const prepared=scene.children[1];const start=prepared.position.clone();effects.tick(10,10000);
+ assert.equal(scene.children.length,2);assert.equal(prepared.parent,scene);assert.ok(prepared.position.distanceTo(start)<.001);
+ const g=new T.Group(),body=new T.Group();g.add(body);scene.add(g);const p={g,body,arms:[new T.Group(),new T.Group()]};effects.serve(p,'espresso');effects.tick(1,11000);assert.equal(prepared.parent,body);assert.equal(p.hasCoffee,true);
+});
