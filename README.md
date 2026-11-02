@@ -17,7 +17,7 @@ Open port 5173 through the Codespaces Ports panel. Keep the server running. Use 
 
 - Drag the scene to rotate the camera. Pinch or use +/− to zoom.
 - Check the next customer's order, select its recipe, and brew.
-- Swipe the recipe cards sideways to explore the full menu.
+- Scroll the recipe list in the left panel to explore the full menu.
 - Buy beans and milk in Supplies. Each recipe lists ingredients, selling price and current preparation time.
 - Use Upgrades to grow the business. All three upgrade tracks reach level 10.
 
@@ -79,7 +79,7 @@ Commit source changes and the regenerated portable export. Do not commit node_mo
 
 ## Scope
 
-Playable prototype with 12 coffees, inventory, sales, 10 levels each for machine/caravan/barista, animated customers and local saves. Decorations are currently fixed. Buildable regions, sound, day/night, quest rewards and cloud saves are future features. No Hay Day assets are used.
+Playable prototype with 12 coffees, inventory, sales, 10 levels each for machine/caravan/barista, animated customers and local saves. Decorations are currently fixed. Day/night lighting, café seating, occasional traffic and daily financial reports are included. Buildable regions, sound, quest rewards and cloud saves are future features. No Hay Day assets are used.
 
 ## Sale animations
 
@@ -98,3 +98,11 @@ Customers first walk to the separate touchscreen kiosk diagonally in front of th
 Served guests reserve one of six chairs, walk to their table, sit with bent knees and sip their drink. Visits last a randomly selected 18–35 seconds after seating. Guests then stand, free the chair and leave; later guests can reuse it. If all chairs are occupied, a guest leaves with their takeaway coffee. Seated guests do not consume order-queue capacity.
 
 A separate road lane in front of the café carries colorful cars and vans in both directions. One vehicle passes at a time, followed by a random 25–55 second gap after it leaves. The vehicle lane is separated from customer entry, kiosk and pickup routes. Vehicle geometry is disposed after leaving the scene. Café visits and traffic pause while the tab is hidden.
+
+## Side panels, game clock and daily accounts
+
+Menu and Supplies are on the left; upgrades and the daily business report are on the right, keeping the scene center clear. Narrow screens use the Café and Business buttons to open one side drawer at a time. The 24-hour game clock sits at the top center.
+
+A full game day lasts four real minutes of active play: 06:00–18:00 takes two minutes, then 18:00–06:00 takes another two. Sky, ambient lighting, stars and warm café lights transition with the clock. The clock pauses in a hidden tab and resumes from the saved game time; it does not simulate offline days.
+
+Daily reports count coffees delivered, revenue, ingredient cost and upgrade spending. Net profit is revenue minus ingredients used minus upgrades. Beans cost 4 lira per portion; milk costs 3.75 lira per portion. Purchasing inventory is not charged again in this report: its cost is recognized when a coffee is sold. All accounting is stored as integer cents. A new report starts at 06:00; up to seven previous days are retained, with the last day summarized in the panel. Existing saves begin a fresh report while keeping lifetime sales, cash, stock and upgrades. Clock/report state autosaves every five seconds and on gameplay transactions or hiding the page.

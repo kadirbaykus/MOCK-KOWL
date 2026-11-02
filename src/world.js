@@ -7,12 +7,13 @@ import {createCaravanController} from './caravan.js';
 import {createCustomerFlow} from './customer-flow.js';
 import {createSeats,cafeTables} from './seating.js';
 import {createTraffic,roadZ} from './traffic.js';
+import {createDayLight} from './day-light.js';
 export function createWorld(host){
  const scene=new T.Scene();scene.background=new T.Color('#a7d9f0');scene.fog=new T.Fog('#a7d9f0',40,90);
  const renderer=new T.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.NeutralToneMapping;renderer.toneMappingExposure=1.05;host.append(renderer.domElement);
  const camera=new T.PerspectiveCamera(38,1,.1,100);camera.position.set(13,14,18);
  const controls=new OrbitControls(camera,renderer.domElement);controls.target.set(0,.6,1.8);controls.enableDamping=true;controls.enablePan=false;controls.minDistance=13;controls.maxDistance=30;controls.minPolarAngle=.35;controls.maxPolarAngle=1.25;
- scene.add(new T.HemisphereLight('#eaf6ff','#7b9251',1.8));const sun=new T.DirectionalLight('#fff1d4',2.4);sun.position.set(-8,18,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;sun.shadow.normalBias=.04;scene.add(sun);
+ const ambient=new T.HemisphereLight('#eaf6ff','#7b9251',1.8);scene.add(ambient);const sun=new T.DirectionalLight('#fff1d4',2.4);sun.position.set(-8,18,7);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-18;sun.shadow.camera.right=18;sun.shadow.camera.top=18;sun.shadow.camera.bottom=-18;sun.shadow.normalBias=.04;scene.add(sun);
  const mats={};const mat=c=>mats[c]??=(new T.MeshStandardMaterial({color:c,roughness:.85}));
  function mesh(geo,color,x,y,z,parent=scene){const m=new T.Mesh(geo,mat(color));m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;}
  const box=(w,h,d,c,x,y,z,p)=>mesh(new RoundedBoxGeometry(w,h,d,2,Math.min(.07,w/5,h/5,d/5)),c,x,y,z,p);
@@ -65,6 +66,7 @@ export function createWorld(host){
  for(const x of [3.86,4.1,4.34])sphere(.035,'#fff6cc',x,1.9,3.29);
  for(let i=0;i<4;i++){const marker=mesh(new T.ConeGeometry(.13,.04,3),'#fff0b9',2.9-i*.7,.39,3.5-i*.42);marker.rotation.y=-.8;}
  // Customers walk in, queue, and leave after a sale.
+ const daylight=createDayLight(scene,sun,ambient,mat);
  const effects=createSaleEffects(scene,van,mat);
  // The car lane is outside the café's pedestrian approach and pickup queues.
  box(35,.12,2.6,'#7c8983',0,.25,roadZ);box(35,.12,.18,'#efe1bd',0,.3,roadZ-1.4);
@@ -92,5 +94,5 @@ export function createWorld(host){
  controls.update();renderer.render(scene,camera);}
  renderer.setAnimationLoop(tick);
  function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();}window.addEventListener('resize',resize);resize();
- return {person,completeSale,canCollect:flow.canCollect,customerCount:flow.activeCount,orderStatus:flow.snapshot,readyCoffee:effects.ready,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level,options)=>caravan.setLevel(level,options),renderer};
+ return {setTime:daylight.setTime,person,completeSale,canCollect:flow.canCollect,customerCount:flow.activeCount,orderStatus:flow.snapshot,readyCoffee:effects.ready,brewing:effects.brewing,rotate:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.applyAxisAngle(new T.Vector3(0,1,0),v);camera.position.copy(controls.target).add(offset);},zoom:(v)=>{const offset=camera.position.clone().sub(controls.target);offset.multiplyScalar(v);const len=T.MathUtils.clamp(offset.length(),13,30);offset.setLength(len);camera.position.copy(controls.target).add(offset);},upgrade:(level,options)=>caravan.setLevel(level,options),renderer};
 }
